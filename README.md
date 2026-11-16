@@ -1,25 +1,28 @@
-# Dr. Suganya M — Learning & Development Portfolio
+# Dr. Suganya M | Learning & Development Portfolio
 
-**Technical Educator | Full-Stack Learning | Behavioural Capability**
+A public portfolio showcasing technical learning, enterprise enablement, instructional design and behavioural capability.
 
-I design structured learning experiences that help people understand concepts, practise them, demonstrate competence and apply them at work.
+## View the website
 
-## Portfolio
-- [Learning design approach](learning-design.md)
-- [Course / module template](templates/course-template.md)
-- [Assessment and rubric](assessment-and-rubric.md)
-- [Feedback system](feedback-system.md)
-- [Sample 90-minute session](sample-session.md)
-- [Interview preparation](interview-preparation.md)
-- [First 30-day plan](30-day-plan.md)
+https://suganmtechie-cloud.github.io/suganya-learning-portfolio/
 
-## Experience snapshot
-- Senior Software Engineer II, HCL Software (Dec 2022–Present)
-- HCL Commerce V9.1.x product training for customers, business partners and internal employees
-- Former Assistant Professor; placement-oriented programming classes
-- RPA training for 100+ students; workshops, FDPs and hackathons
-- PhD, Computer Science & Engineering (Cloud Security); M.E. Computer Science; MBA, Information Systems
-- HCL Software Top Influencer Award (2024)
+## Featured resources
+
+- Learning design approach
+- Course and module template
+- Sample 90 minute technical session
+- Assessment and rubric
+- Feedback system
+- First 30 day plan
+
+## About
+
+Dr. Suganya M is a Senior Manager in Learning & Development at HCL Software, with experience across enterprise software enablement and higher education. Her work includes technical training, learning journey and certification development, LMS enabled learning, curriculum design and facilitation.
+
+## Website features
+
+Responsive layout, mobile navigation, animated section reveals, expandable education and awards panels, and direct links to portfolio resources. Built with HTML, CSS and JavaScript for GitHub Pages.
 
 ## Privacy
-This public portfolio intentionally excludes personal phone number, street address, personal email, original resume and private learner data. Review all content before sharing.
+
+This public portfolio intentionally excludes personal phone number, personal email, street address, private learner data and confidential employer materials.
