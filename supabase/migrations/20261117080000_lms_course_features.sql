@@ -110,10 +110,6 @@ with check (
   )
 );
 
-create policy "Learners update their own enrollment completion"
-on public.course_enrollments for update to authenticated
-using (learner_id = (select auth.uid()))
-with check (learner_id = (select auth.uid()));
 
 create policy "Learners manage only their own lesson progress"
 on public.lesson_progress for all to authenticated
