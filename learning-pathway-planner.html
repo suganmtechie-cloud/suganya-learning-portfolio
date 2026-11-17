@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10162f">
+  <meta name="description" content="A practical learning pathway builder for turning workplace capability needs into structured, practice-led learning.">
+  <title>Learning Pathway Builder | Dr. Suganya M</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #10162f;
+      --panel: #1b264d;
+      --panel-raised: #24325e;
+      --text: #f7f8ff;
+      --muted: #bdc6df;
+      --cyan: #62ded3;
+      --blue: #9aa9ff;
+      --coral: #ff9b83;
+      --line: #ffffff24;
+      --focus: #ffd477;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at 8% 0%, #394c9a55, transparent 34%), var(--bg);
+      color: var(--text);
+      font: 16px/1.6 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--cyan); }
+    button, input, select, textarea { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+    .skip-link {
+      position: absolute; left: 12px; top: -60px; z-index: 20;
+      padding: 10px 14px; background: var(--focus); color: #10162f; border-radius: 8px;
+    }
+    .skip-link:focus { top: 12px; }
+    .wrap { width: min(1000px, calc(100% - 36px)); margin: 0 auto; }
+    header { border-bottom: 1px solid var(--line); background: #10162fee; }
+    .nav {
+      min-height: 68px; display: flex; align-items: center; justify-content: space-between;
+      gap: 16px;
+    }
+    .brand { color: var(--text); text-decoration: none; font-weight: 800; letter-spacing: .04em; }
+    .brand span { color: var(--cyan); }
+    .back { font-size: 14px; text-decoration: none; }
+    main { padding: 48px 0 70px; }
+    .eyebrow {
+      display: inline-block; padding: 6px 11px; border: 1px solid #62ded355;
+      border-radius: 30px; color: var(--cyan); background: #62ded311;
+      font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase;
+    }
+    h1, h2, h3 { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.2; }
+    h1 { max-width: 760px; margin: 16px 0 12px; font-size: clamp(34px, 6vw, 58px); letter-spacing: -.04em; }
+    .intro { max-width: 720px; color: var(--muted); font-size: 17px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, .62fr); gap: 20px; margin-top: 30px; align-items: start; }
+    .panel { padding: 24px; border: 1px solid var(--line); border-radius: 20px; background: linear-gradient(145deg, #24325e, #192348); }
+    .panel h2 { margin: 0 0 8px; font-size: 22px; }
+    .hint { margin: 0 0 20px; color: var(--muted); font-size: 13px; }
+    .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field { min-width: 0; }
+    .field.full { grid-column: 1 / -1; }
+    label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; }
+    input, select, textarea {
+      width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid #ffffff3a;
+      border-radius: 10px; background: #101a3a; color: var(--text);
+    }
+    textarea { min-height: 104px; resize: vertical; }
+    input::placeholder, textarea::placeholder { color: #aab5d2; opacity: 1; }
+    .help { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .button {
+      display: inline-flex; justify-content: center; align-items: center; min-height: 44px;
+      padding: 10px 16px; border: 1px solid var(--line); border-radius: 30px;
+      color: var(--text); background: #ffffff0c; font-weight: 750; font-size: 13px; cursor: pointer;
+    }
+    .button.primary { border: 0; color: #10162f; background: linear-gradient(100deg, #62ded3, #9aa9ff); }
+    .button:hover { filter: brightness(1.08); }
+    .side-note { color: var(--muted); font-size: 13px; }
+    .side-note h2 { color: var(--text); font-size: 18px; }
+    .side-note ul { padding-left: 19px; }
+    .side-note li + li { margin-top: 9px; }
+    .privacy { margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .result { margin-top: 24px; }
+    .result[hidden] { display: none; }
+    .result-head { display: flex; justify-content: space-between; align-items: start; gap: 14px; flex-wrap: wrap; }
+    .result-head h2 { margin: 0; font-size: 25px; }
+    .result-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 18px 0 22px; }
+    .meta-item { padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: #ffffff08; min-width: 0; }
+    .meta-item span { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .07em; }
+    .meta-item strong { display: block; margin-top: 4px; overflow-wrap: anywhere; font-size: 14px; }
+    .result h3 { margin: 22px 0 10px; font-size: 17px; }
+    .outcomes { padding-left: 22px; color: var(--muted); }
+    .outcomes li + li { margin-top: 7px; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+    table { width: 100%; border-collapse: collapse; min-width: 650px; font-size: 13px; }
+    th, td { padding: 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: var(--cyan); background: #ffffff09; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+    td { color: var(--muted); }
+    td strong { color: var(--text); }
+    tbody tr:last-child td { border-bottom: 0; }
+    .status { min-height: 24px; margin: 10px 0 0; color: var(--cyan); font-size: 13px; }
+    footer { padding: 22px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    @media (max-width: 760px) {
+      .layout { grid-template-columns: 1fr; }
+      .result-meta { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 520px) {
+      .field-grid, .result-meta { grid-template-columns: 1fr; }
+      .panel { padding: 18px; }
+      .nav { align-items: flex-start; flex-direction: column; justify-content: center; padding: 12px 0; }
+      main { padding-top: 32px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+    @media print {
+      :root { color-scheme: light; }
+      body { background: #fff; color: #111; }
+      header, .intro, #builder, .side-note, footer, .result-actions { display: none !important; }
+      main { padding: 0; }
+      .wrap { width: 100%; }
+      .result, .panel { margin: 0; padding: 0; border: 0; background: #fff; color: #111; }
+      .result h2, .result h3, .meta-item strong, td strong { color: #111; }
+      .meta-item, th { background: #f1f4f8; }
+      .meta-item, .table-wrap { border-color: #bbb; }
+      th, td { color: #222; border-color: #bbb; }
+      .outcomes { color: #222; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to the planner</a>
+  <header>
+    <div class="wrap nav">
+      <a class="brand" href="index.html">SUGANYA<span>.</span>PORTFOLIO</a>
+      <a class="back" href="index.html#work">← Back to portfolio</a>
+    </div>
+  </header>
+  <main id="main" class="wrap">
+    <span class="eyebrow">Interactive learning design tool</span>
+    <h1>Build a learning path around real work.</h1>
+    <p class="intro">Turn a capability need into a practical session sequence with clear outcomes, guided practice, assessment and workplace transfer. Start with the task learners need to perform—not a list of topics.</p>
+
+    <div class="layout">
+      <section class="panel" id="builder" aria-labelledby="builder-title">
+        <h2 id="builder-title">Programme brief</h2>
+        <p class="hint">Complete the fields below to generate a first-draft pathway. Adjust the outline with your subject matter expert before delivery.</p>
+        <form id="planner-form">
+          <div class="field-grid">
+            <div class="field full">
+              <label for="programme">Programme or module name</label>
+              <input id="programme" name="programme" type="text" maxlength="90" placeholder="e.g. Practical data storytelling" required>
+            </div>
+            <div class="field">
+              <label for="audience">Target learners</label>
+              <input id="audience" name="audience" type="text" maxlength="100" placeholder="e.g. New people managers" required>
+            </div>
+            <div class="field">
+              <label for="duration">Total learning time (hours)</label>
+              <input id="duration" name="duration" type="number" min="1" max="40" step="0.5" value="4" required>
+              <span class="help">Choose between 1 and 40 hours.</span>
+            </div>
+            <div class="field full">
+              <label for="task">What should learners be able to do at work?</label>
+              <textarea id="task" name="task" maxlength="240" placeholder="Describe one observable workplace task or capability." required></textarea>
+              <span class="help">Example: facilitate a customer discovery conversation and capture agreed next steps.</span>
+            </div>
+            <div class="field">
+              <label for="level">Current learner level</label>
+              <select id="level" name="level">
+                <option value="foundation">Foundation — new to the task</option>
+                <option value="intermediate">Intermediate — some experience</option>
+                <option value="advanced">Advanced — experienced practitioners</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="delivery">Delivery approach</label>
+              <select id="delivery" name="delivery">
+                <option value="Instructor-led">Instructor-led</option>
+                <option value="Virtual instructor-led">Virtual instructor-led</option>
+                <option value="Blended">Blended</option>
+                <option value="Self-paced">Self-paced</option>
+              </select>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="button primary" type="submit">Build learning path</button>
+            <button class="button" type="reset">Clear brief</button>
+          </div>
+        </form>
+      </section>
+
+      <aside class="panel side-note" aria-labelledby="principles-title">
+        <h2 id="principles-title">Design principles built in</h2>
+        <ul>
+          <li><strong>Start with performance:</strong> anchor the programme in a task learners need to do.</li>
+          <li><strong>Model before practice:</strong> show what good performance looks like.</li>
+          <li><strong>Make practice visible:</strong> include guided and independent application.</li>
+          <li><strong>Assess evidence:</strong> check the task, not attendance alone.</li>
+          <li><strong>Plan transfer:</strong> finish with a specific workplace action.</li>
+        </ul>
+        <p class="privacy">Privacy: the brief is processed in this page only. It is not sent to a server or saved by this tool.</p>
+      </aside>
+    </div>
+
+    <section class="panel result" id="result" aria-labelledby="result-title" aria-live="polite" hidden>
+      <div class="result-head">
+        <div>
+          <span class="eyebrow">Your first draft</span>
+          <h2 id="result-title">Suggested learning pathway</h2>
+        </div>
+        <div class="actions result-actions">
+          <button class="button" id="copy-plan" type="button">Copy plan</button>
+          <button class="button" id="print-plan" type="button">Print / Save PDF</button>
+        </div>
+      </div>
+      <div id="result-content"></div>
+      <p class="status" id="status-message" role="status"></p>
+    </section>
+    <noscript><p class="panel">JavaScript is required to build the pathway. Enable JavaScript in your browser and reload this page.</p></noscript>
+  </main>
+  <footer><div class="wrap">Dr. Suganya M · Learning &amp; Development Portfolio · A planning aid, not a substitute for learner research or SME review.</div></footer>
+
+  <script>
+    (function () {
+      const form = document.getElementById('planner-form');
+      const result = document.getElementById('result');
+      const resultContent = document.getElementById('result-content');
+      const statusMessage = document.getElementById('status-message');
+      const copyButton = document.getElementById('copy-plan');
+      const printButton = document.getElementById('print-plan');
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, function (character) {
+          return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+          }[character];
+        });
+      }
+
+      function allocateMinutes(total, percentages) {
+        const exact = percentages.map(function (percentage) {
+          return total * percentage / 100;
+        });
+        const minutes = exact.map(function (value) { return Math.floor(value); });
+        let remaining = total - minutes.reduce(function (sum, value) { return sum + value; }, 0);
+        const order = exact.map(function (value, index) {
+          return { index: index, remainder: value - Math.floor(value) };
+        }).sort(function (a, b) { return b.remainder - a.remainder; });
+        for (let index = 0; index < remaining; index += 1) {
+          minutes[order[index % order.length].index] += 1;
+        }
+        return minutes;
+      }
+
+      function formatMinutes(value) {
+        const hours = Math.floor(value / 60);
+        const minutes = value % 60;
+        if (hours && minutes) return hours + ' hr ' + minutes + ' min';
+        if (hours) return hours + (hours === 1 ? ' hr' : ' hrs');
+        return minutes + ' min';
+      }
+
+      function buildPlan(data) {
+        const levelGuidance = {
+          foundation: {
+            practice: 'Use a worked example, short steps, prompts and frequent facilitator check-ins.',
+            independent: 'Complete a familiar task with a checklist and access to reference notes.'
+          },
+          intermediate: {
+            practice: 'Use a realistic case with partial prompts; compare approaches and explain decisions.',
+            independent: 'Complete a less familiar scenario, then review the result against agreed criteria.'
+          },
+          advanced: {
+            practice: 'Use a complex case with constraints; challenge assumptions and justify trade-offs.',
+            independent: 'Solve an authentic, open-ended challenge and defend the choices made.'
+          }
+        };
+        const guidance = levelGuidance[data.level];
+        const phases = [
+          {
+            name: 'Connect to the work',
+            share: 10,
+            focus: 'Clarify the business context, learner experience and what successful performance looks like.',
+            activity: 'Discuss a short workplace scenario and identify the quality criteria.',
+            evidence: 'A baseline question or short learner self-check.'
+          },
+          {
+            name: 'Explain and model',
+            share: 20,
+            focus: 'Introduce the core concepts, process and tools needed for the target task.',
+            activity: 'Facilitator demonstration or annotated worked example, followed by questions.',
+            evidence: 'Learners identify key steps and explain why they matter.'
+          },
+          {
+            name: 'Practise with guidance',
+            share: 30,
+            focus: 'Break the task into manageable steps and give learners supported repetition.',
+            activity: guidance.practice,
+            evidence: 'A completed practice attempt with specific feedback.'
+          },
+          {
+            name: 'Apply independently',
+            share: 25,
+            focus: 'Ask learners to perform the task in a realistic situation with less support.',
+            activity: guidance.independent,
+            evidence: 'A work-like output assessed against a visible rubric or checklist.'
+          },
+          {
+            name: 'Check and transfer',
+            share: 15,
+            focus: 'Confirm what learners can do and plan how they will use it at work.',
+            activity: 'Short knowledge or performance check, reflection and one workplace action.',
+            evidence: 'Assessment result plus a dated transfer commitment.'
+          }
+        ];
+        const minutes = allocateMinutes(data.totalMinutes, phases.map(function (phase) { return phase.share; }));
+        const outcomes = [
+          'Explain the purpose and success criteria for ' + data.task + '.',
+          'Perform ' + data.task + ' using an appropriate process and available tools.',
+          'Review the result against agreed criteria and identify a practical improvement.'
+        ];
+        const meta = [
+          ['Programme', data.programme],
+          ['Target learners', data.audience],
+          ['Total time', formatMinutes(data.totalMinutes)],
+          ['Delivery', data.delivery],
+          ['Learner level', data.levelLabel],
+          ['Workplace task', data.task]
+        ];
+        const metaHtml = meta.map(function (item) {
+          return '<div class="meta-item"><span>' + escapeHtml(item[0]) + '</span><strong>' + escapeHtml(item[1]) + '</strong></div>';
+        }).join('');
+        const outcomesHtml = outcomes.map(function (outcome) {
+          return '<li>' + escapeHtml(outcome) + '</li>';
+        }).join('');
+        const rowsHtml = phases.map(function (phase, index) {
+          return '<tr><td><strong>' + (index + 1) + '. ' + escapeHtml(phase.name) + '</strong><br>' + formatMinutes(minutes[index]) + '</td>' +
+            '<td>' + escapeHtml(phase.focus) + '</td><td>' + escapeHtml(phase.activity) + '</td><td>' + escapeHtml(phase.evidence) + '</td></tr>';
+        }).join('');
+        return '<div class="result-meta">' + metaHtml + '</div>' +
+          '<h3>Observable learning outcomes</h3><ol class="outcomes">' + outcomesHtml + '</ol>' +
+          '<h3>Suggested sequence</h3><div class="table-wrap"><table><thead><tr><th scope="col">Phase / time</th><th scope="col">Focus</th><th scope="col">Learning activity</th><th scope="col">Evidence of learning</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>' +
+          '<h3>Facilitator quality check</h3><p class="side-note">Before delivery, confirm that the task reflects real role requirements, the rubric describes observable performance, practice materials are accessible, and a manager or workplace opportunity supports transfer after the session.</p>';
+      }
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+        const hours = Number(form.elements.duration.value);
+        const data = {
+          programme: form.elements.programme.value.trim(),
+          audience: form.elements.audience.value.trim(),
+          task: form.elements.task.value.trim(),
+          totalMinutes: Math.round(hours * 60),
+          delivery: form.elements.delivery.value,
+          level: form.elements.level.value,
+          levelLabel: form.elements.level.options[form.elements.level.selectedIndex].text.split(' — ')[0]
+        };
+        if (!data.programme || !data.audience || !data.task || !Number.isFinite(data.totalMinutes)) {
+          statusMessage.textContent = 'Please complete each field with a valid value.';
+          return;
+        }
+        resultContent.innerHTML = buildPlan(data);
+        result.hidden = false;
+        statusMessage.textContent = 'Pathway created. Review the sequence with your learners and subject matter expert.';
+        result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      form.addEventListener('reset', function () {
+        result.hidden = true;
+        resultContent.textContent = '';
+        statusMessage.textContent = '';
+      });
+
+      function fallbackCopy(text) {
+        const field = document.createElement('textarea');
+        field.value = text;
+        field.setAttribute('readonly', '');
+        field.style.position = 'fixed';
+        field.style.opacity = '0';
+        document.body.appendChild(field);
+        field.select();
+        let copied = false;
+        try { copied = document.execCommand('copy'); } catch (error) { copied = false; }
+        field.remove();
+        return copied;
+      }
+
+      copyButton.addEventListener('click', function () {
+        const text = resultContent.innerText.trim();
+        if (!text) return;
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(function () {
+            statusMessage.textContent = 'Learning pathway copied.';
+          }).catch(function () {
+            statusMessage.textContent = fallbackCopy(text) ? 'Learning pathway copied.' : 'Copy is unavailable in this browser. You can print or save the plan instead.';
+          });
+        } else {
+          statusMessage.textContent = fallbackCopy(text) ? 'Learning pathway copied.' : 'Copy is unavailable in this browser. You can print or save the plan instead.';
+        }
+      });
+
+      printButton.addEventListener('click', function () {
+        window.print();
+      });
+    }());
+  </script>
+</body>
+</html>

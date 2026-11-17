@@ -14,6 +14,7 @@ https://suganmtechie-cloud.github.io/suganya-learning-portfolio/
 - Assessment and rubric
 - Feedback system
 - First 30 day plan
+- Interactive learning pathway builder
 
 ## About
 
