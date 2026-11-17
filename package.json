@@ -10,7 +10,9 @@
     "dev": "vite",
     "build": "tsc --noEmit -p tsconfig.app.json && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "api:dev": "npm --prefix backend run dev",
+    "api:test": "npm --prefix backend test"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",
