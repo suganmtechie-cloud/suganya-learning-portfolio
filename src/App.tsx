@@ -1,4 +1,5 @@
 import { isSupabaseConfigured } from './lib/supabase'
+import PathwayWorkspace from './features/pathways/PathwayWorkspace'
 
 const learningAreas = [
   { number: '01', title: 'Learning pathways', detail: 'Design role-based journeys with outcomes, modules and milestones.', tag: 'Curriculum design' },
@@ -32,10 +33,12 @@ export default function App() {
           </aside>
         </section>
 
-        <section aria-labelledby="areas-heading" className="pb-16">
+        <PathwayWorkspace />
+
+        <section aria-labelledby="areas-heading" className="py-16">
           <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
             <div><p className="text-xs font-semibold uppercase tracking-[.2em] text-rose-300">Product roadmap</p><h2 id="areas-heading" className="mt-2 text-2xl font-bold sm:text-3xl">Your learning workspace</h2></div>
-            <p className="max-w-md text-sm leading-6 text-slate-400">The first foundation is in place. These core areas will become interactive features over the next development increments.</p>
+            <p className="max-w-md text-sm leading-6 text-slate-400">These core areas will grow into connected features as the application develops.</p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {learningAreas.map((area) => (
