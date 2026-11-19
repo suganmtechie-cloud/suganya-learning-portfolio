@@ -1,4 +1,7 @@
-import { isSupabaseConfigured } from './lib/supabase'
+import { useCallback, useState } from 'react'
+import type { User } from 'firebase/auth'
+import { isFirebaseConfigured } from './lib/firebase'
+import FirebaseAuthPanel from './features/auth/FirebaseAuthPanel'
 import PathwayWorkspace from './features/pathways/PathwayWorkspace'
 
 const learningAreas = [
@@ -8,6 +11,9 @@ const learningAreas = [
 ]
 
 export default function App() {
+  const [user, setUser] = useState<User | null>(null)
+  const handleUserChange = useCallback((nextUser: User | null) => setUser(nextUser), [])
+
   return (
     <main className="min-h-screen px-5 py-8 text-slate-100 sm:px-8 lg:px-12">
       <div className="mx-auto max-w-6xl">
@@ -25,15 +31,16 @@ export default function App() {
           <aside className="rounded-2xl border border-white/10 bg-white/[.06] p-6 shadow-2xl shadow-black/20">
             <p className="text-sm font-semibold text-slate-200">Platform connection</p>
             <div className="mt-4 flex items-center gap-3">
-              <span className={`h-2.5 w-2.5 rounded-full ${isSupabaseConfigured ? 'bg-emerald-400' : 'bg-amber-300'}`} aria-hidden="true" />
-              <span className="font-medium">{isSupabaseConfigured ? 'Supabase credentials detected' : 'Supabase setup required'}</span>
+              <span className={`h-2.5 w-2.5 rounded-full ${isFirebaseConfigured ? 'bg-emerald-400' : 'bg-amber-300'}`} aria-hidden="true" />
+              <span className="font-medium">{isFirebaseConfigured ? 'Firebase configured' : 'Firebase setup required'}</span>
             </div>
-            <p className="mt-3 text-sm leading-6 text-slate-400">{isSupabaseConfigured ? 'The client configuration is present. Database access will be enabled as the schema and authenticated workflows are added.' : 'Add your project URL and publishable key to .env.local. No credentials are stored in this repository.'}</p>
-            <p className="mt-4 text-xs text-slate-500">Connection status checks local configuration only; it does not yet verify a live database request.</p>
+            <p className="mt-3 text-sm leading-6 text-slate-400">{isFirebaseConfigured ? 'Firebase web configuration is present. Sign in below to load and save your cloud pathways.' : 'Add the Firebase web app settings to your GitHub Actions secrets to enable cloud accounts and synchronization.'}</p>
+            <p className="mt-4 text-xs text-slate-500">Configuration status only; cloud access is confirmed when you sign in and load your records.</p>
+            <FirebaseAuthPanel onUserChange={handleUserChange} />
           </aside>
         </section>
 
-        <PathwayWorkspace />
+        <PathwayWorkspace user={user} />
 
         <section aria-labelledby="areas-heading" className="py-16">
           <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
@@ -51,7 +58,7 @@ export default function App() {
           </div>
         </section>
 
-        <footer className="border-t border-white/10 py-6 text-sm text-slate-500">Built incrementally with React, TypeScript, Tailwind CSS, Vite and Supabase.</footer>
+        <footer className="border-t border-white/10 py-6 text-sm text-slate-500">Built incrementally with React, TypeScript, Tailwind CSS, Vite and Firebase.</footer>
       </div>
     </main>
   )
