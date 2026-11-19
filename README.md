@@ -5,25 +5,27 @@ A growing Learning & Development application: portfolio, learning pathway design
 ## Technology
 
 - **Frontend:** React 19, TypeScript, Vite 8 and Tailwind CSS 4
-- **Platform backend:** Supabase PostgreSQL, Auth and Row Level Security
-- **Optional server API:** Node.js 22 and Express for server-only workflows
-- **DevOps:** Docker Compose and GitHub Actions
+- **Cloud data and identity:** Firebase Authentication and Cloud Firestore
+- **Hosting:** GitHub Pages with GitHub Actions
+- **Optional server API:** Node.js 22 and Express for future trusted server-side workflows
 
 ## Architecture
 
-The original static portfolio and its resources remain at the repository root. The React application lives in `src/` and `app/`.
+The original static portfolio and its resources remain at the repository root. The React Learning Studio lives in `src/` and `app/`.
 
-Supabase is the system of record for application data and identity. The React app uses the Supabase publishable key and Row Level Security. The Express API is a separate server-side extension point for work that should not run in the browser (for example, certificate generation or trusted integrations). It connects to the same Supabase PostgreSQL database through the server-only `DATABASE_URL`; it does not introduce a second production database or a duplicate password store.
+Firebase Authentication provides email/password sign-in. Cloud Firestore stores each user's pathways and module outlines under `users/{uid}/pathways`. Firestore Security Rules restrict each signed-in user to their own documents and deny access to all other document paths by default.
 
-The existing `learning_paths` table represents a course, and `learning_modules` represents its modules. The LMS migration adds categories, lessons, enrollments and learner progress while reusing Supabase Auth's `auth.users` identities.
+The Firebase browser configuration is supplied through GitHub Actions repository secrets at build time. Firebase web configuration is not a server credential; authorization is enforced by Authentication and Firestore Security Rules. Never add a Firebase service-account private key or Admin SDK credential to a browser build.
 
 ## Current React workspace
 
 - Create and retain learning pathway drafts with an audience, practical outcome, level and duration.
 - Add up to 12 modules to each pathway, with a learning objective, optional activity notes and estimated minutes.
 - Edit, remove and reorder modules. A time-allocation indicator compares module estimates with the overall programme duration.
-- Drafts currently remain in the browser's local storage. They are not synchronized to Supabase yet.
-- The migration `20261119070000_learning_module_outcomes.sql` adds the module outcome and time-estimate fields to the existing database model. It does not change the table's existing Row Level Security policies.
+- Sign in or create an account using Firebase Authentication.
+- Save pathway and module changes to the signed-in user's Firestore collection.
+- On first sign-in, merge browser-saved drafts into the cloud account without duplicating records that already exist there. The browser copy is retained as a local backup.
+- Learning resources, assessments, certification tracking and learner progress remain roadmap areas; their data models and security rules must be added before those features are enabled.
 
 ## Run locally
 
@@ -32,48 +34,28 @@ Requirements: Node.js 22.12+ and npm.
 ```bash
 npm install
 cp .env.example .env.local
-# Fill in the Supabase Project URL, publishable key and server database URL.
+# Fill in the Firebase Web App configuration values.
 npm run dev
 ```
 
-The React application is served by Vite. To run the optional Express API in another terminal:
+See [Firebase setup](docs/FIREBASE_SETUP.md) for project creation, Authentication, Firestore rules and GitHub Actions secrets.
 
-```bash
-npm install --prefix backend
-npm run api:dev
-```
+## GitHub Pages deployment
 
-The API listens on http://localhost:4000. Its `/api/health` endpoint checks the PostgreSQL connection; the root endpoint is a process liveness check.
+The workflow builds the React app and publishes it alongside the existing static portfolio. Add the six `VITE_FIREBASE_*` repository secrets under **Settings → Secrets and variables → Actions**. Without these values, the app still builds and retains browser-only drafts, but cloud sign-in remains disabled.
 
-## Docker
+## Optional Express API
 
-After configuring `.env.local`, run:
-
-```bash
-docker compose up --build
-```
-
-The API container uses the same Supabase database URL as the application. This deliberately avoids creating a second local PostgreSQL database whose schema could drift from Supabase. Stop it with `docker compose down`.
-
-## Supabase setup
-
-1. Copy the Project URL and publishable key from Supabase **Connect** into `.env.local`.
-2. Copy the PostgreSQL connection string into `DATABASE_URL` in the same file. Keep it server-only; never use a `VITE_` prefix for it.
-3. Install and link the Supabase CLI to your project.
-4. Review and apply migrations with `supabase db push`.
-
-The migrations add learning paths, modules, module objectives and time estimates, categories, lessons, enrollments and progress with Row Level Security. They have not been applied to your hosted Supabase project by this repository change.
-
-**Security:** Never commit `.env.local`, database passwords, Supabase secret keys or service-role keys. The browser must use only the publishable key. Never disable RLS to make a feature work.
+The existing Express API is separate from the React app and is not currently used for pathway storage. Future server-side features should use Firebase Admin SDK only in a trusted server environment, with service-account credentials stored as server secrets and never exposed to the browser.
 
 ## Scripts
 
 - `npm run dev` — React development server
 - `npm run typecheck` — TypeScript checks
 - `npm run build` — typecheck and production build
-- `npm run api:dev` — Express API in watch mode
+- `npm run api:dev` — optional Express API in watch mode
 - `npm run api:test` — backend tests
 
-## Privacy
+## Privacy and security
 
-Do not add personal contact details, private learner information or confidential employer materials to this public repository.
+Do not add personal contact details, private learner information or confidential employer materials to this public repository. Never commit `.env.local`, Firebase service-account files, private keys or Admin SDK credentials. Publish the Firestore rules before using cloud data.
