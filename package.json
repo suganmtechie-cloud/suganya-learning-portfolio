@@ -15,7 +15,7 @@
     "api:test": "npm --prefix backend test"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.119.0",
+    "firebase": "^12.6.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
