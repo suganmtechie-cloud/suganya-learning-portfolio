@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
+import type { User } from 'firebase/auth'
+import { deleteCloudPathway, listCloudPathways, saveCloudPathway } from '../../lib/pathwayRepository'
 import ModuleOutlineEditor from './ModuleOutlineEditor'
 import type { LearningLevel, LearningModuleDraft, LearningPathDraft } from './pathwayTypes'
 
@@ -85,11 +87,12 @@ function createId(): string {
     : String(Date.now()) + '-' + Math.random().toString(36).slice(2)
 }
 
-export default function PathwayWorkspace() {
+export default function PathwayWorkspace({ user }: { user: User | null }) {
   const [drafts, setDrafts] = useState<LearningPathDraft[]>(readSavedDrafts)
   const [formError, setFormError] = useState('')
   const [notice, setNotice] = useState('')
   const [storageAvailable, setStorageAvailable] = useState(true)
+  const [cloudLoading, setCloudLoading] = useState(false)
 
   useEffect(() => {
     try {
@@ -99,6 +102,34 @@ export default function PathwayWorkspace() {
       setStorageAvailable(false)
     }
   }, [drafts])
+
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+    setCloudLoading(true)
+    setNotice('Loading your cloud pathways and checking this browser for drafts to migrate…')
+    void (async () => {
+      try {
+        const cloudDrafts = await listCloudPathways(user.uid)
+        if (cancelled) return
+        const cloudIds = new Set(cloudDrafts.map((draft) => draft.id))
+        const browserOnlyDrafts = drafts.filter((draft) => !cloudIds.has(draft.id))
+        const merged = [...cloudDrafts, ...browserOnlyDrafts]
+        setDrafts(merged)
+        await Promise.all(browserOnlyDrafts.map((draft) => saveCloudPathway(user.uid, draft)))
+        if (!cancelled) setNotice(browserOnlyDrafts.length > 0
+          ? `Cloud sync ready. Migrated ${browserOnlyDrafts.length} browser draft(s) without duplicating existing cloud records.`
+          : 'Cloud sync ready. Your pathways are loaded from Firebase.')
+      } catch (error) {
+        if (!cancelled) setNotice(error instanceof Error ? `Cloud sync failed: ${error.message}` : 'Cloud sync failed. Your browser drafts are still available.')
+      } finally {
+        if (!cancelled) setCloudLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+  // The initial browser drafts are intentionally captured when the account signs in.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid])
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -139,18 +170,23 @@ export default function PathwayWorkspace() {
 
     setDrafts((current) => [draft, ...current])
     setFormError('')
-    setNotice('Your learning pathway draft has been saved in this browser.')
+    setNotice(user ? 'Saving your learning pathway to Firebase…' : 'Saved in this browser. Sign in to sync this pathway to the cloud.')
+    if (user) void saveCloudPathway(user.uid, draft).then(() => setNotice('Learning pathway saved to your Firebase cloud account.')).catch((error: unknown) => setNotice(error instanceof Error ? `Cloud save failed: ${error.message}. Your browser copy is retained.` : 'Cloud save failed. Your browser copy is retained.'))
     form.reset()
   }
 
   function removeDraft(id: string) {
     setDrafts((current) => current.filter((draft) => draft.id !== id))
-    setNotice('The learning pathway draft was removed.')
+    setNotice('The learning pathway draft was removed from this workspace.')
+    if (user) void deleteCloudPathway(user.uid, id).then(() => setNotice('Learning pathway deleted from your Firebase cloud account.')).catch((error: unknown) => setNotice(error instanceof Error ? `Cloud delete failed: ${error.message}` : 'Cloud delete failed.'))
   }
 
   function updateModules(draftId: string, modules: LearningModuleDraft[]) {
+    const updated = drafts.find((draft) => draft.id === draftId)
+    const nextDraft = updated ? { ...updated, modules } : null
     setDrafts((current) => current.map((draft) => draft.id === draftId ? { ...draft, modules } : draft))
-    setNotice('The module outline was saved in this browser.')
+    setNotice(user ? 'Saving module outline to Firebase…' : 'Module outline saved in this browser. Sign in to sync it to the cloud.')
+    if (user && nextDraft) void saveCloudPathway(user.uid, nextDraft).then(() => setNotice('Module outline saved to your Firebase cloud account.')).catch((error: unknown) => setNotice(error instanceof Error ? `Cloud save failed: ${error.message}. Your browser copy is retained.` : 'Cloud save failed. Your browser copy is retained.'))
   }
 
   return (
@@ -171,7 +207,7 @@ export default function PathwayWorkspace() {
           </div>
 
           <p className="mt-4 text-xs leading-5 text-slate-500">
-            Drafts are stored in this browser only; they are not synced to Supabase yet. Avoid entering personal, confidential or identifiable learner information.
+            {user ? 'Signed in: pathway and module changes are synchronized to your Firebase account. A local browser copy is also retained.' : 'Sign in above to store pathways and modules in your private Firebase cloud account. Existing browser drafts will be migrated after sign-in.'} Avoid entering personal, confidential or identifiable learner information.
           </p>
         </div>
 
@@ -224,6 +260,7 @@ export default function PathwayWorkspace() {
             <span className="text-sm text-slate-400">{drafts.length} {drafts.length === 1 ? 'draft' : 'drafts'}</span>
           </div>
 
+          {cloudLoading && <p className="mt-4 text-sm text-teal-200" role="status">Synchronizing your cloud workspace…</p>}
           {!storageAvailable && (
             <p className="mt-4 rounded-lg border border-amber-300/30 bg-amber-300/10 px-3 py-2 text-sm text-amber-100" role="status">
               Browser storage is unavailable. Drafts will remain visible only until this page is refreshed.
