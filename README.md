@@ -17,6 +17,14 @@ Supabase is the system of record for application data and identity. The React ap
 
 The existing `learning_paths` table represents a course, and `learning_modules` represents its modules. The LMS migration adds categories, lessons, enrollments and learner progress while reusing Supabase Auth's `auth.users` identities.
 
+## Current React workspace
+
+- Create and retain learning pathway drafts with an audience, practical outcome, level and duration.
+- Add up to 12 modules to each pathway, with a learning objective, optional activity notes and estimated minutes.
+- Edit, remove and reorder modules. A time-allocation indicator compares module estimates with the overall programme duration.
+- Drafts currently remain in the browser's local storage. They are not synchronized to Supabase yet.
+- The migration `20261119070000_learning_module_outcomes.sql` adds the module outcome and time-estimate fields to the existing database model. It does not change the table's existing Row Level Security policies.
+
 ## Run locally
 
 Requirements: Node.js 22.12+ and npm.
@@ -54,7 +62,7 @@ The API container uses the same Supabase database URL as the application. This d
 3. Install and link the Supabase CLI to your project.
 4. Review and apply migrations with `supabase db push`.
 
-The migrations add learning paths, modules, categories, lessons, enrollments and progress with Row Level Security. They have not been applied to your hosted Supabase project by this repository change.
+The migrations add learning paths, modules, module objectives and time estimates, categories, lessons, enrollments and progress with Row Level Security. They have not been applied to your hosted Supabase project by this repository change.
 
 **Security:** Never commit `.env.local`, database passwords, Supabase secret keys or service-role keys. The browser must use only the publishable key. Never disable RLS to make a feature work.
 

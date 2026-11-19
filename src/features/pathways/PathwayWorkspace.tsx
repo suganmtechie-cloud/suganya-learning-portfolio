@@ -1,37 +1,68 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-
-type LearningLevel = 'Beginner' | 'Intermediate' | 'Advanced'
-
-type LearningPathDraft = {
-  id: string
-  title: string
-  audience: string
-  outcome: string
-  level: LearningLevel
-  durationHours: number
-  createdAt: string
-}
+import ModuleOutlineEditor from './ModuleOutlineEditor'
+import type { LearningLevel, LearningModuleDraft, LearningPathDraft } from './pathwayTypes'
 
 const STORAGE_KEY = 'suganya-learning-pathway-drafts-v1'
 const fieldClassName = 'mt-2 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-teal-300 focus:ring-2 focus:ring-teal-300/20'
 
-function isLearningPathDraft(value: unknown): value is LearningPathDraft {
-  if (!value || typeof value !== 'object') return false
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
 
-  const draft = value as Record<string, unknown>
-  return (
-    typeof draft.id === 'string' &&
-    typeof draft.title === 'string' &&
-    typeof draft.audience === 'string' &&
-    typeof draft.outcome === 'string' &&
-    (draft.level === 'Beginner' || draft.level === 'Intermediate' || draft.level === 'Advanced') &&
-    typeof draft.durationHours === 'number' &&
-    Number.isInteger(draft.durationHours) &&
-    draft.durationHours >= 1 &&
-    draft.durationHours <= 40 &&
-    typeof draft.createdAt === 'string'
-  )
+function normalizeModule(value: unknown, index: number): LearningModuleDraft | null {
+  if (!isRecord(value)) return null
+  if (typeof value.id !== 'string' || typeof value.title !== 'string') return null
+  if (value.title.trim().length < 3 || value.title.length > 120) return null
+
+  return {
+    id: value.id,
+    title: value.title,
+    learningObjective: typeof value.learningObjective === 'string' ? value.learningObjective.slice(0, 300) : '',
+    description: typeof value.description === 'string' ? value.description.slice(0, 500) : '',
+    estimatedMinutes: typeof value.estimatedMinutes === 'number' && Number.isInteger(value.estimatedMinutes)
+      ? Math.min(600, Math.max(0, value.estimatedMinutes))
+      : 30,
+    position: typeof value.position === 'number' && Number.isInteger(value.position) ? value.position : index,
+  }
+}
+
+function normalizeDraft(value: unknown): LearningPathDraft | null {
+  if (!isRecord(value)) return null
+
+  const level = value.level
+  if (level !== 'Beginner' && level !== 'Intermediate' && level !== 'Advanced') return null
+  if (
+    typeof value.id !== 'string' ||
+    typeof value.title !== 'string' ||
+    value.title.trim().length < 3 ||
+    typeof value.audience !== 'string' ||
+    typeof value.outcome !== 'string' ||
+    typeof value.durationHours !== 'number' ||
+    !Number.isInteger(value.durationHours) ||
+    value.durationHours < 1 ||
+    value.durationHours > 40 ||
+    typeof value.createdAt !== 'string'
+  ) return null
+
+  const modules = Array.isArray(value.modules)
+    ? value.modules
+      .map(normalizeModule)
+      .filter((module): module is LearningModuleDraft => module !== null)
+      .sort((left, right) => left.position - right.position)
+      .map((module, position) => ({ ...module, position }))
+    : []
+
+  return {
+    id: value.id,
+    title: value.title,
+    audience: value.audience,
+    outcome: value.outcome,
+    level: level as LearningLevel,
+    durationHours: value.durationHours,
+    createdAt: value.createdAt,
+    modules,
+  }
 }
 
 function readSavedDrafts(): LearningPathDraft[] {
@@ -40,7 +71,9 @@ function readSavedDrafts(): LearningPathDraft[] {
     if (!saved) return []
 
     const parsed: unknown = JSON.parse(saved)
-    return Array.isArray(parsed) ? parsed.filter(isLearningPathDraft) : []
+    return Array.isArray(parsed)
+      ? parsed.map(normalizeDraft).filter((draft): draft is LearningPathDraft => draft !== null)
+      : []
   } catch {
     return []
   }
@@ -101,6 +134,7 @@ export default function PathwayWorkspace() {
       level,
       durationHours,
       createdAt: new Date().toISOString(),
+      modules: [],
     }
 
     setDrafts((current) => [draft, ...current])
@@ -112,6 +146,11 @@ export default function PathwayWorkspace() {
   function removeDraft(id: string) {
     setDrafts((current) => current.filter((draft) => draft.id !== id))
     setNotice('The learning pathway draft was removed.')
+  }
+
+  function updateModules(draftId: string, modules: LearningModuleDraft[]) {
+    setDrafts((current) => current.map((draft) => draft.id === draftId ? { ...draft, modules } : draft))
+    setNotice('The module outline was saved in this browser.')
   }
 
   return (
@@ -207,12 +246,17 @@ export default function PathwayWorkspace() {
                       <h4 className="mt-2 text-lg font-bold text-white">{draft.title}</h4>
                     </div>
                     <button type="button" onClick={() => removeDraft(draft.id)} aria-label={'Delete ' + draft.title + ' draft'} className="rounded-lg border border-white/15 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:border-rose-300/50 hover:text-rose-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-300">
-                      Remove
+                      Remove pathway
                     </button>
                   </div>
                   <p className="mt-3 text-sm text-slate-300"><span className="font-semibold text-slate-100">Audience:</span> {draft.audience}</p>
                   <p className="mt-2 text-sm leading-6 text-slate-400">{draft.outcome}</p>
-                  <p className="mt-4 text-xs text-slate-500">Created {new Date(draft.createdAt).toLocaleDateString()}</p>
+                  <p className="mt-3 text-xs text-slate-500">Created {new Date(draft.createdAt).toLocaleDateString()}</p>
+                  <ModuleOutlineEditor
+                    modules={draft.modules}
+                    durationHours={draft.durationHours}
+                    onChange={(modules) => updateModules(draft.id, modules)}
+                  />
                 </li>
               ))}
             </ul>
