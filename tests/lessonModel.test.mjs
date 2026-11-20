@@ -18,6 +18,7 @@ test('external lesson resources accept HTTPS only', () => {
 test('lesson content validation applies format-specific rules', () => {
   assert.equal(isLessonContentValid('text', 'Read the scenario'), true)
   assert.equal(isLessonContentValid('text', '   '), false)
+  assert.equal(isLessonContentValid('text', 'x'.repeat(801)), false)
   assert.equal(isLessonContentValid('video', 'https://example.com/video'), true)
   assert.equal(isLessonContentValid('pdf', 'http://example.com/handout.pdf'), false)
 })

@@ -66,7 +66,7 @@ export default function LessonOutlineEditor({ lessons, onChange }: LessonOutline
     }
     if (!isLessonContentValid(format, cleanContent)) {
       setFormError(format === 'text'
-        ? 'Add lesson content (up to 4,000 characters).'
+        ? 'Add concise lesson notes (up to 800 characters).'
         : 'Enter a valid HTTPS URL for this resource.')
       return
     }
@@ -147,7 +147,7 @@ export default function LessonOutlineEditor({ lessons, onChange }: LessonOutline
             <div className="sm:col-span-2">
               <label htmlFor={idPrefix + '-content'} className="text-xs font-medium text-slate-200">{format === 'text' ? 'Lesson content' : 'Resource URL (HTTPS)'}</label>
               {format === 'text' ? (
-                <textarea id={idPrefix + '-content'} value={content} onChange={(event) => setContent(event.target.value)} className={fieldClassName} placeholder="Write key explanations, instructions or reading content…" rows={4} maxLength={4000} required />
+                <textarea id={idPrefix + '-content'} value={content} onChange={(event) => setContent(event.target.value)} className={fieldClassName} placeholder="Write concise lesson notes or a reading summary…" rows={4} maxLength={800} required />
               ) : (
                 <input id={idPrefix + '-content'} type="url" value={content} onChange={(event) => setContent(event.target.value)} className={fieldClassName} placeholder="https://…" maxLength={2000} required />
               )}

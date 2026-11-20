@@ -17,7 +17,7 @@ export function isLessonContentValid(format, content) {
   if (typeof content !== 'string') return false
   const cleanContent = content.trim()
 
-  if (format === 'text') return cleanContent.length >= 1 && cleanContent.length <= 4000
+  if (format === 'text') return cleanContent.length >= 1 && cleanContent.length <= 800
   if (format === 'video' || format === 'pdf' || format === 'link') return isHttpsUrl(cleanContent)
   return false
 }
@@ -34,7 +34,7 @@ export function normalizeLessons(value) {
       const title = item.title.trim().slice(0, 120)
       const format = item.format
       const content = typeof item.content === 'string'
-        ? item.content.slice(0, format === 'text' ? 4000 : 2000)
+        ? item.content.slice(0, format === 'text' ? 800 : 2000)
         : ''
       if (title.length < 3 || !LESSON_FORMATS.has(format) || !isLessonContentValid(format, content)) return []
 

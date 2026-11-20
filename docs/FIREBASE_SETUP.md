@@ -61,7 +61,7 @@ Keep the browser's local storage intact until the cloud migration has been check
 ## Current scope
 
 - Cloud-backed pathway drafts, module outlines and nested lesson content.
-- Lessons are stored inside the owning user's pathway document, so the existing user-scoped Firestore rule protects them with the same ownership boundary. The UI validates lesson structure, limits each module to 20 lessons and accepts HTTPS-only external resource links.
+- Lessons are stored inside the owning user's pathway document, so the existing user-scoped Firestore rule protects them with the same ownership boundary. The UI validates lesson structure, limits each module to 20 lessons, caps text notes at 800 characters and accepts HTTPS-only external resource links.
 - Email/password account creation and sign-in.
 - Per-user Firestore access rules.
 - Other areas (resource library, assessments, certification tracking and learner progress) remain roadmap items and should receive explicit data models and rules before they are enabled.
