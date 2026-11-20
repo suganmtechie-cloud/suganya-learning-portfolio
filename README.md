@@ -21,6 +21,7 @@ The Firebase browser configuration is supplied through GitHub Actions repository
 
 - Create and retain learning pathway drafts with an audience, practical outcome, level and duration.
 - Add up to 12 modules to each pathway, with a learning objective, optional activity notes and estimated minutes.
+- Add up to 20 lessons per module, using text content or HTTPS links for video, PDF and other resources; edit, reorder and estimate lesson time.
 - Edit, remove and reorder modules. A time-allocation indicator compares module estimates with the overall programme duration.
 - Sign in or create an account using Firebase Authentication.
 - Save pathway and module changes to the signed-in user's Firestore collection.
@@ -52,6 +53,7 @@ The existing Express API is separate from the React app and is not currently use
 
 - `npm run dev` — React development server
 - `npm run typecheck` — TypeScript checks
+- `npm run test:unit` — dependency-free lesson model tests using Node's built-in test runner
 - `npm run build` — typecheck and production build
 - `npm run api:dev` — optional Express API in watch mode
 - `npm run api:test` — backend tests

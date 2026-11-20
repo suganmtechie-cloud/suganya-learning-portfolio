@@ -1,4 +1,14 @@
 export type LearningLevel = 'Beginner' | 'Intermediate' | 'Advanced'
+export type LearningLessonFormat = 'text' | 'video' | 'pdf' | 'link'
+
+export type LearningLessonDraft = {
+  id: string
+  title: string
+  format: LearningLessonFormat
+  content: string
+  estimatedMinutes: number
+  position: number
+}
 
 export type LearningModuleDraft = {
   id: string
@@ -7,6 +17,7 @@ export type LearningModuleDraft = {
   description: string
   estimatedMinutes: number
   position: number
+  lessons: LearningLessonDraft[]
 }
 
 export type LearningPathDraft = {

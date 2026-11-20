@@ -1,6 +1,7 @@
 import { useId, useState } from 'react'
 import type { FormEvent } from 'react'
 import type { LearningModuleDraft } from './pathwayTypes'
+import LessonOutlineEditor from './LessonOutlineEditor'
 
 type ModuleOutlineEditorProps = {
   modules: LearningModuleDraft[]
@@ -98,6 +99,9 @@ export default function ModuleOutlineEditor({
       position: editingModuleId
         ? modules.find((module) => module.id === editingModuleId)?.position ?? modules.length
         : modules.length,
+      lessons: editingModuleId
+        ? modules.find((module) => module.id === editingModuleId)?.lessons ?? []
+        : [],
     }
 
     const nextModules = editingModuleId
@@ -213,6 +217,10 @@ export default function ModuleOutlineEditor({
                   <button type="button" onClick={() => removeModule(module.id)} aria-label={'Remove ' + module.title} className="rounded-md border border-white/15 px-2 py-1 text-xs text-rose-200 hover:border-rose-300/40">Remove</button>
                 </div>
               </div>
+              <LessonOutlineEditor
+                lessons={module.lessons ?? []}
+                onChange={(lessons) => onChange(modules.map((item) => item.id === module.id ? { ...item, lessons } : item))}
+              />
             </li>
           ))}
         </ol>

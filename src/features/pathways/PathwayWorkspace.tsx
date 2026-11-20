@@ -4,6 +4,7 @@ import type { User } from 'firebase/auth'
 import { deleteCloudPathway, listCloudPathways, saveCloudPathway } from '../../lib/pathwayRepository'
 import ModuleOutlineEditor from './ModuleOutlineEditor'
 import type { LearningLevel, LearningModuleDraft, LearningPathDraft } from './pathwayTypes'
+import { normalizeLessons } from './lessonModel.mjs'
 
 const STORAGE_KEY = 'suganya-learning-pathway-drafts-v1'
 const fieldClassName = 'mt-2 w-full rounded-xl border border-white/15 bg-slate-950/60 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-teal-300 focus:ring-2 focus:ring-teal-300/20'
@@ -26,6 +27,7 @@ function normalizeModule(value: unknown, index: number): LearningModuleDraft | n
       ? Math.min(600, Math.max(0, value.estimatedMinutes))
       : 30,
     position: typeof value.position === 'number' && Number.isInteger(value.position) ? value.position : index,
+    lessons: normalizeLessons(value.lessons),
   }
 }
 
@@ -110,7 +112,9 @@ export default function PathwayWorkspace({ user }: { user: User | null }) {
     setNotice('Loading your cloud pathways and checking this browser for drafts to migrate…')
     void (async () => {
       try {
-        const cloudDrafts = await listCloudPathways(user.uid)
+        const cloudDrafts = (await listCloudPathways(user.uid))
+          .map(normalizeDraft)
+          .filter((draft): draft is LearningPathDraft => draft !== null)
         if (cancelled) return
         const cloudIds = new Set(cloudDrafts.map((draft) => draft.id))
         const browserOnlyDrafts = drafts.filter((draft) => !cloudIds.has(draft.id))
