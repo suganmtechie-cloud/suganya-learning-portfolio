@@ -13,9 +13,9 @@ A growing Learning & Development application: portfolio, learning pathway design
 
 The original static portfolio and its resources remain at the repository root. The React Learning Studio lives in `src/` and `app/`.
 
-Firebase Authentication provides email/password sign-in. Cloud Firestore stores each user's pathways and module outlines under `users/{uid}/pathways`. Firestore Security Rules restrict each signed-in user to their own documents and deny access to all other document paths by default.
+Firebase Authentication provides email/password sign-in. The React workspace uses a typed `PathwayStore` contract, currently implemented by a Cloud Firestore adapter that stores each user's pathways under `users/{uid}/pathways`. Firestore Security Rules restrict each signed-in user to their own documents and deny access to all other document paths by default. See [storage architecture](docs/STORAGE_ARCHITECTURE.md) before changing or adding a backend.
 
-The Firebase browser configuration is supplied through GitHub Actions repository secrets at build time. Firebase web configuration is not a server credential; authorization is enforced by Authentication and Firestore Security Rules. Never add a Firebase service-account private key or Admin SDK credential to a browser build.
+The Firebase browser configuration is supplied through GitHub Actions repository secrets at build time. Supabase SQL files in `supabase/migrations` are not evidence of a live connection or applied migrations; the Supabase adapter remains inactive until the project and its RLS policies can be verified. Firebase web configuration is not a server credential; authorization is enforced by Authentication and Firestore Security Rules. Never add a Firebase service-account private key or Admin SDK credential to a browser build.
 
 ## Current React workspace
 
