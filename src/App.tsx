@@ -3,10 +3,11 @@ import type { User } from 'firebase/auth'
 import { isFirebaseConfigured } from './lib/firebase'
 import FirebaseAuthPanel from './features/auth/FirebaseAuthPanel'
 import PathwayWorkspace from './features/pathways/PathwayWorkspace'
+import ResourceLibrary from './features/resources/ResourceLibrary'
 
 const learningAreas = [
   { number: '01', title: 'Learning pathways', detail: 'Design role-based journeys with outcomes, modules and milestones.', tag: 'Curriculum design' },
-  { number: '02', title: 'Learning resources', detail: 'Organize facilitator guides, practice activities and reference material.', tag: 'Content library' },
+  { number: '02', title: 'Resource library', detail: 'Browse and organize design guides, assessment tools, feedback prompts and facilitator resources.', tag: 'Available now' },
   { number: '03', title: 'Progress & reflection', detail: 'Track learning activity and capture evidence of skill development.', tag: 'Learner growth' },
 ]
 
@@ -42,10 +43,12 @@ export default function App() {
 
         <PathwayWorkspace user={user} />
 
+        <ResourceLibrary />
+
         <section aria-labelledby="areas-heading" className="py-16">
           <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
             <div><p className="text-xs font-semibold uppercase tracking-[.2em] text-rose-300">Product roadmap</p><h2 id="areas-heading" className="mt-2 text-2xl font-bold sm:text-3xl">Your learning workspace</h2></div>
-            <p className="max-w-md text-sm leading-6 text-slate-400">These core areas will grow into connected features as the application develops.</p>
+            <p className="max-w-md text-sm leading-6 text-slate-400">The pathway builder and resource library are available now. Learner progress and reflection will be developed next.</p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {learningAreas.map((area) => (
@@ -58,7 +61,7 @@ export default function App() {
           </div>
         </section>
 
-        <footer className="border-t border-white/10 py-6 text-sm text-slate-500">Built incrementally with React, TypeScript, Tailwind CSS, Vite and Firebase.</footer>
+        <footer className="border-t border-white/10 py-6 text-sm text-slate-500">Built incrementally with React, TypeScript, Tailwind CSS, Vite and Firebase. Custom resource links currently stay in this browser.</footer>
       </div>
     </main>
   )

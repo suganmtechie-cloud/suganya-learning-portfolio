@@ -26,7 +26,8 @@ The Firebase browser configuration is supplied through GitHub Actions repository
 - Sign in or create an account using Firebase Authentication.
 - Save pathway and module changes to the signed-in user's Firestore collection.
 - On first sign-in, merge browser-saved drafts into the cloud account without duplicating records that already exist there. The browser copy is retained as a local backup.
-- Learning resources, assessments, certification tracking and learner progress remain roadmap areas; their data models and security rules must be added before those features are enabled.
+- Browse five built-in L&D resources covering design, assessment, feedback, facilitation and course templates. Add HTTPS references and filter the library; custom links remain in the current browser only.
+- Learner progress, reflection, certification tracking and cloud resource storage remain roadmap areas; their data models and security rules must be added before those features are enabled.
 
 ## Run locally
 
@@ -39,7 +40,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-See [Firebase setup](docs/FIREBASE_SETUP.md) for project creation, Authentication, Firestore rules and GitHub Actions secrets.
+See [Firebase setup](docs/FIREBASE_SETUP.md) for project creation, Authentication, Firestore rules and GitHub Actions secrets. See [resource library guidance](docs/RESOURCE_LIBRARY.md) for built-in assets and local-only custom links.
 
 ## GitHub Pages deployment
 
