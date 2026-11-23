@@ -1,9 +1,9 @@
-import { useCallback, useState } from 'react'
+import { lazy, Suspense, useCallback, useState } from 'react'
 import type { User } from 'firebase/auth'
 import { isFirebaseConfigured } from './lib/firebase'
-import FirebaseAuthPanel from './features/auth/FirebaseAuthPanel'
+const FirebaseAuthPanel = lazy(() => import('./features/auth/FirebaseAuthPanel'))
 import PathwayWorkspace from './features/pathways/PathwayWorkspace'
-import ResourceLibrary from './features/resources/ResourceLibrary'
+import DeferredResourceLibrary from './features/resources/DeferredResourceLibrary'
 
 const learningAreas = [
   { number: '01', title: 'Learning pathways', detail: 'Design role-based journeys with outcomes, modules and milestones.', tag: 'Curriculum design' },
@@ -13,6 +13,7 @@ const learningAreas = [
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null)
+  const [authPanelOpen, setAuthPanelOpen] = useState(false)
   const handleUserChange = useCallback((nextUser: User | null) => setUser(nextUser), [])
 
   return (
@@ -37,13 +38,37 @@ export default function App() {
             </div>
             <p className="mt-3 text-sm leading-6 text-slate-400">{isFirebaseConfigured ? 'Firebase web configuration is present. Sign in below to load and save your cloud pathways.' : 'Add the Firebase web app settings to your GitHub Actions secrets to enable cloud accounts and synchronization.'}</p>
             <p className="mt-4 text-xs text-slate-500">Configuration status only; cloud access is confirmed when you sign in and load your records.</p>
-            <FirebaseAuthPanel onUserChange={handleUserChange} />
+            {isFirebaseConfigured ? (
+              <div className="mt-4">
+                {!authPanelOpen && (
+                  <button
+                    type="button"
+                    onClick={() => setAuthPanelOpen(true)}
+                    className="min-h-10 rounded-lg border border-teal-300/40 px-3 py-2 text-xs font-semibold text-teal-100 hover:bg-teal-300/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-200"
+                  >
+                    Load cloud sign-in
+                  </button>
+                )}
+                {authPanelOpen && (
+                  <Suspense fallback={<p className="mt-3 text-sm text-slate-400" role="status" aria-live="polite">Loading cloud authentication…</p>}>
+                    <FirebaseAuthPanel onUserChange={handleUserChange} />
+                  </Suspense>
+                )}
+                <p className="mt-3 text-xs leading-5 text-slate-500">Authentication code loads only when requested. Firestore code loads after sign-in.</p>
+              </div>
+            ) : (
+              <div className="mt-4 rounded-xl border border-amber-300/25 bg-amber-300/5 p-4">
+                <p className="font-semibold text-amber-100">Firebase setup required</p>
+                <p className="mt-2 text-sm leading-6 text-slate-300">Add the Firebase web app settings to your GitHub Actions secrets to enable cloud accounts and synchronization.</p>
+                <a className="mt-2 inline-block text-sm font-semibold text-teal-200 underline" href="https://github.com/suganmtechie-cloud/suganya-learning-portfolio/blob/main/docs/FIREBASE_SETUP.md">Open Firebase setup guide</a>
+              </div>
+            )}
           </aside>
         </section>
 
         <PathwayWorkspace user={user} />
 
-        <ResourceLibrary />
+        <DeferredResourceLibrary />
 
         <section aria-labelledby="areas-heading" className="py-16">
           <div className="mb-7 flex flex-wrap items-end justify-between gap-3">

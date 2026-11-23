@@ -1,7 +1,3 @@
-import { initializeApp, getApps } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
-
 const config = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY as string | undefined,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN as string | undefined,
@@ -15,9 +11,24 @@ export const isFirebaseConfigured = Boolean(
   config.apiKey && config.authDomain && config.projectId && config.appId,
 )
 
-const app = isFirebaseConfigured
-  ? (getApps()[0] ?? initializeApp(config))
-  : null
+export async function getFirebaseApp() {
+  if (!isFirebaseConfigured) return null
 
-export const firebaseAuth = app ? getAuth(app) : null
-export const firestore = app ? getFirestore(app) : null
+  const { getApps, initializeApp } = await import('firebase/app')
+  const existingDefaultApp = getApps().find((app) => app.name === '[DEFAULT]')
+  return existingDefaultApp ?? initializeApp(config)
+}
+
+export async function getFirebaseAuth() {
+  const app = await getFirebaseApp()
+  if (!app) return null
+  const { getAuth } = await import('firebase/auth')
+  return getAuth(app)
+}
+
+export async function getFirebaseFirestore() {
+  const app = await getFirebaseApp()
+  if (!app) return null
+  const { getFirestore } = await import('firebase/firestore')
+  return getFirestore(app)
+}

@@ -6,8 +6,8 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth'
-import type { User } from 'firebase/auth'
-import { firebaseAuth, isFirebaseConfigured } from '../../lib/firebase'
+import type { Auth, User } from 'firebase/auth'
+import { getFirebaseAuth, isFirebaseConfigured } from '../../lib/firebase'
 
 type Props = { onUserChange: (user: User | null) => void }
 
@@ -18,25 +18,49 @@ export default function FirebaseAuthPanel({ onUserChange }: Props) {
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
+  const [auth, setAuth] = useState<Auth | null>(null)
 
   useEffect(() => {
-    if (!firebaseAuth) return
-    return onAuthStateChanged(firebaseAuth, (nextUser) => {
-      setUser(nextUser)
-      onUserChange(nextUser)
+    let cancelled = false
+    let unsubscribe: (() => void) | undefined
+
+    void getFirebaseAuth().then((nextAuth) => {
+      if (cancelled) return
+      setAuth(nextAuth)
+      if (!nextAuth) {
+        onUserChange(null)
+        return
+      }
+      unsubscribe = onAuthStateChanged(nextAuth, (nextUser) => {
+        setUser(nextUser)
+        onUserChange(nextUser)
+      })
+    }).catch((error: unknown) => {
+      if (!cancelled) {
+        setMessage(error instanceof Error ? error.message : 'Could not load Firebase authentication.')
+        onUserChange(null)
+      }
     })
+
+    return () => {
+      cancelled = true
+      unsubscribe?.()
+    }
   }, [onUserChange])
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!firebaseAuth) return
+    if (!auth) {
+      setMessage('Firebase authentication is still loading. Please try again.')
+      return
+    }
     setBusy(true)
     setMessage('')
     try {
       if (mode === 'signup') {
-        await createUserWithEmailAndPassword(firebaseAuth, email.trim(), password)
+        await createUserWithEmailAndPassword(auth, email.trim(), password)
       } else {
-        await signInWithEmailAndPassword(firebaseAuth, email.trim(), password)
+        await signInWithEmailAndPassword(auth, email.trim(), password)
       }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Authentication failed. Please try again.')
@@ -46,8 +70,8 @@ export default function FirebaseAuthPanel({ onUserChange }: Props) {
   }
 
   async function handleSignOut() {
-    if (!firebaseAuth) return
-    await signOut(firebaseAuth)
+    if (!auth) return
+    await signOut(auth)
     setMessage('Signed out. Your cloud records remain safely in your account.')
   }
 

@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import type { User } from 'firebase/auth'
 import { deleteCloudPathway, listCloudPathways, saveCloudPathway } from '../../lib/pathwayRepository'
-import ModuleOutlineEditor from './ModuleOutlineEditor'
+const ModuleOutlineEditor = lazy(() => import('./ModuleOutlineEditor'))
 import type { LearningLevel, LearningModuleDraft, LearningPathDraft } from './pathwayTypes'
 import { normalizeLessons } from './lessonModel.mjs'
 
@@ -293,11 +293,13 @@ export default function PathwayWorkspace({ user }: { user: User | null }) {
                   <p className="mt-3 text-sm text-slate-300"><span className="font-semibold text-slate-100">Audience:</span> {draft.audience}</p>
                   <p className="mt-2 text-sm leading-6 text-slate-400">{draft.outcome}</p>
                   <p className="mt-3 text-xs text-slate-500">Created {new Date(draft.createdAt).toLocaleDateString()}</p>
-                  <ModuleOutlineEditor
-                    modules={draft.modules}
-                    durationHours={draft.durationHours}
-                    onChange={(modules) => updateModules(draft.id, modules)}
-                  />
+                  <Suspense fallback={<p className="mt-3 text-xs text-slate-400" role="status" aria-live="polite">Loading the course outline editor…</p>}>
+                    <ModuleOutlineEditor
+                      modules={draft.modules}
+                      durationHours={draft.durationHours}
+                      onChange={(modules) => updateModules(draft.id, modules)}
+                    />
+                  </Suspense>
                 </li>
               ))}
             </ul>

@@ -6,19 +6,16 @@ import {
   serverTimestamp,
   setDoc,
 } from 'firebase/firestore'
-import { firestore } from './firebase'
+import { getFirebaseFirestore } from './firebase'
 import type { PathwayStore } from './pathwayStore'
 import type { LearningPathDraft } from '../features/pathways/pathwayTypes'
 
-function database() {
-  if (!firestore) {
+async function pathwayCollection(ownerId: string) {
+  const database = await getFirebaseFirestore()
+  if (!database) {
     throw new Error('Firebase is not configured. Add the Firebase web app settings to the deployment environment.')
   }
-  return firestore
-}
-
-function pathwayCollection(ownerId: string) {
-  return collection(database(), 'users', ownerId, 'pathways')
+  return collection(database, 'users', ownerId, 'pathways')
 }
 
 /**
@@ -27,7 +24,7 @@ function pathwayCollection(ownerId: string) {
  */
 export const firebasePathwayStore: PathwayStore = {
   async list(ownerId) {
-    const snapshot = await getDocs(pathwayCollection(ownerId))
+    const snapshot = await getDocs(await pathwayCollection(ownerId))
     return snapshot.docs.map((item) => {
       const data = item.data()
       return {
@@ -44,7 +41,8 @@ export const firebasePathwayStore: PathwayStore = {
   },
 
   async save(ownerId, pathway) {
-    await setDoc(doc(pathwayCollection(ownerId), pathway.id), {
+    const pathways = await pathwayCollection(ownerId)
+    await setDoc(doc(pathways, pathway.id), {
       ...pathway,
       ownerId,
       updatedAt: serverTimestamp(),
@@ -52,6 +50,7 @@ export const firebasePathwayStore: PathwayStore = {
   },
 
   async remove(ownerId, pathwayId) {
-    await deleteDoc(doc(pathwayCollection(ownerId), pathwayId))
+    const pathways = await pathwayCollection(ownerId)
+    await deleteDoc(doc(pathways, pathwayId))
   },
 }
