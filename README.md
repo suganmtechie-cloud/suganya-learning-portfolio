@@ -13,7 +13,7 @@ A growing Learning & Development application: portfolio, learning pathway design
 
 The original static portfolio and its resources remain at the repository root. The React Learning Studio lives in `src/` and `app/`.
 
-Firebase Authentication provides email/password sign-in. The React workspace uses a typed `PathwayStore` contract, currently implemented by a Cloud Firestore adapter that stores each user's pathways under `users/{uid}/pathways`. Firestore Security Rules restrict each signed-in user to their own documents and deny access to all other document paths by default. Authentication, Firestore, the module editor and the resource library are loaded on demand to keep the initial workspace lighter. See [storage architecture](docs/STORAGE_ARCHITECTURE.md) and [performance architecture](docs/PERFORMANCE.md) before changing the backend or loading boundaries.
+Firebase Authentication provides email/password sign-in. The React workspace uses a typed `PathwayStore` contract, currently implemented by a Cloud Firestore adapter that stores each user's pathways under `users/{uid}/pathways`. Firestore Security Rules restrict each signed-in user to their own documents and deny access to all other document paths by default. Pathway writes also use an explicit top-level field allowlist, field type/size checks, an ID-to-document-path check, immutable creation time and a server-generated update timestamp. The nested module list is count-limited; every nested module/lesson field is not yet independently validated by Firestore Rules. See [Firestore security contract](docs/FIRESTORE_SECURITY.md) before adding learner records. Authentication, Firestore, the module editor and the resource library are loaded on demand to keep the initial workspace lighter. See [storage architecture](docs/STORAGE_ARCHITECTURE.md) and [performance architecture](docs/PERFORMANCE.md) before changing the backend or loading boundaries.
 
 The Firebase browser configuration is supplied through GitHub Actions repository secrets at build time. Supabase SQL files in `supabase/migrations` are not evidence of a live connection or applied migrations; the Supabase adapter remains inactive until the project and its RLS policies can be verified. Firebase web configuration is not a server credential; authorization is enforced by Authentication and Firestore Security Rules. Never add a Firebase service-account private key or Admin SDK credential to a browser build.
 
@@ -54,7 +54,7 @@ The existing Express API is separate from the React app and is not currently use
 
 - `npm run dev` — React development server
 - `npm run typecheck` — TypeScript checks
-- `npm run test:unit` — dependency-free lesson model tests using Node's built-in test runner
+- `npm run test:unit` — dependency-free tests for feature models, repository boundaries and the Firestore rules source contract
 - `npm run build` — typecheck and production build
 - `npm run api:dev` — optional Express API in watch mode
 - `npm run api:test` — backend tests

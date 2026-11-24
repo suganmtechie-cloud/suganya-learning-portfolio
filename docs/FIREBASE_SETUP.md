@@ -19,7 +19,8 @@ This repository uses Firebase Authentication and Cloud Firestore. The Firebase w
 
 1. Open **Firestore Database** and create a database.
 2. Choose a region appropriate for your users and data residency requirements. The database location cannot be changed after creation.
-3. In **Firestore → Rules**, publish the contents of this repository's `firestore.rules` file, or deploy them with the Firebase CLI:
+3. Review [the Firestore security contract](FIRESTORE_SECURITY.md).
+4. In **Firestore → Rules**, publish the contents of this repository's `firestore.rules` file, or deploy them with the Firebase CLI:
 
    ```bash
    npm install --global firebase-tools
@@ -28,7 +29,7 @@ This repository uses Firebase Authentication and Cloud Firestore. The Firebase w
    firebase deploy --only firestore:rules
    ```
 
-The rules allow each authenticated user to read and change only their own pathway documents under `users/{uid}/pathways`. All other paths are denied by default.
+The rules scope each signed-in user to their own pathway path, enforce an allowlist and basic field bounds on pathway writes, preserve the original creation time, and deny other document paths by default. The nested module/lesson list has a count limit but is not fully schema-validated by Rules; see the security contract before adding learner records.
 
 ## 4. Configure GitHub Pages
 
@@ -58,10 +59,10 @@ When a user signs in for the first time after Firebase is configured, the app me
 
 Keep the browser's local storage intact until the cloud migration has been checked. Signing out does not delete cloud data.
 
-## Current scope
+## 7. Current scope
 
 - Cloud-backed pathway drafts, module outlines and nested lesson content.
 - Lessons are stored inside the owning user's pathway document, so the existing user-scoped Firestore rule protects them with the same ownership boundary. The UI validates lesson structure, limits each module to 20 lessons, caps text notes at 800 characters and accepts HTTPS-only external resource links.
 - Email/password account creation and sign-in.
-- Per-user Firestore access rules.
+- Per-user Firestore access rules with a strict pathway document shape; see [Firestore security contract](FIRESTORE_SECURITY.md).
 - Other areas (resource library, assessments, certification tracking and learner progress) remain roadmap items and should receive explicit data models and rules before they are enabled.

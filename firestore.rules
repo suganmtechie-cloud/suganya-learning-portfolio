@@ -2,24 +2,75 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Each signed-in user can access only their own pathway documents.
+    function isSignedInAs(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function hasValidPathwayShape(pathwayId, userId) {
+      let data = request.resource.data;
+      return data.keys().hasAll([
+          'id',
+          'title',
+          'audience',
+          'outcome',
+          'level',
+          'durationHours',
+          'createdAt',
+          'modules',
+          'ownerId',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id',
+          'title',
+          'audience',
+          'outcome',
+          'level',
+          'durationHours',
+          'createdAt',
+          'modules',
+          'ownerId',
+          'updatedAt'
+        ])
+        && data.id is string
+        && data.id == pathwayId
+        && data.ownerId is string
+        && data.ownerId == userId
+        && data.title is string
+        && data.title.size() >= 3
+        && data.title.size() <= 80
+        && data.audience is string
+        && data.audience.size() >= 1
+        && data.audience.size() <= 100
+        && data.outcome is string
+        && data.outcome.size() >= 1
+        && data.outcome.size() <= 240
+        && data.level is string
+        && data.level in ['Beginner', 'Intermediate', 'Advanced']
+        && data.durationHours is int
+        && data.durationHours >= 1
+        && data.durationHours <= 40
+        && data.createdAt is string
+        && data.createdAt.size() >= 20
+        && data.createdAt.size() <= 40
+        && data.modules is list
+        && data.modules.size() <= 12
+        // The client writes this field with Firestore serverTimestamp().
+        && data.updatedAt == request.time;
+    }
+
     match /users/{userId}/pathways/{pathwayId} {
-      allow read, delete: if request.auth != null && request.auth.uid == userId;
-      allow create, update: if request.auth != null
-        && request.auth.uid == userId
-        && request.resource.data.ownerId == userId
-        && request.resource.data.title is string
-        && request.resource.data.title.size() >= 3
-        && request.resource.data.title.size() <= 80
-        && request.resource.data.audience is string
-        && request.resource.data.audience.size() <= 100
-        && request.resource.data.outcome is string
-        && request.resource.data.outcome.size() <= 240
-        && request.resource.data.durationHours is int
-        && request.resource.data.durationHours >= 1
-        && request.resource.data.durationHours <= 40
-        && request.resource.data.modules is list
-        && request.resource.data.modules.size() <= 12;
+      // The user ID in the path is the access boundary. This also preserves
+      // read/delete access to older documents that predate the ownerId field.
+      allow read, delete: if isSignedInAs(userId);
+
+      allow create: if isSignedInAs(userId)
+        && hasValidPathwayShape(pathwayId, userId);
+
+      allow update: if isSignedInAs(userId)
+        // A pathway's original creation time cannot be rewritten.
+        && request.resource.data.createdAt == resource.data.createdAt
+        && hasValidPathwayShape(pathwayId, userId);
     }
 
     // Deny access to all other documents until an explicit feature rule is added.
