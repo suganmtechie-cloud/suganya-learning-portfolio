@@ -35,20 +35,50 @@ The rules confirm that `modules` is a list and cap it at 12 entries. The current
 
 Do not treat this nested structure as suitable for sensitive learner records, assessment submissions or certification evidence. Before those features are enabled, move them into separately addressable documents/tables with explicit per-record ownership and validation rules. The planned relational Supabase model with Row Level Security is a candidate once the actual project connection is available and policies can be tested.
 
+## Runtime emulator tests
+
+The repository now includes runtime authorization tests using the Firebase Local Emulator Suite and `@firebase/rules-unit-testing`.
+
+Requirements:
+
+- Node.js 22.12 or later, matching the project toolchain.
+- Java 21 or later for the current Firestore Emulator.
+- Dependencies installed with `npm install`.
+
+Run:
+
+```bash
+npm run test:rules
+```
+
+The command pins Firebase CLI 15.37.0, starts only the Firestore emulator against the demo project ID `demo-learning-studio`, and runs `tests/firestoreRules.emulator.mjs`. The emulator loads the rules configured in `firebase.json`. A demo project ID has no live Firebase resources, so these tests do not read or write the production database.
+
+The runtime suite verifies:
+
+- A user can create, read, update and delete a pathway under their own UID.
+- One user cannot read or write another user's pathway path.
+- Unauthenticated reads and writes are rejected.
+- Incorrect ownership, unexpected fields, mismatched IDs, invalid limits and client-controlled update timestamps are rejected.
+- Updates cannot change the original creation time.
+- Older pathway documents remain readable and deletable by their path owner.
+- Unmatched document paths remain denied.
+
+The repository's `npm run test:unit` continues to run fast, dependency-light source-contract tests. The emulator suite is a separate command because it starts a local Java-based service.
+
+GitHub Actions runs the emulator suite as part of frontend CI. It uses a demo project and does not require Firebase credentials or a deployed Firebase project.
+
 ## Deploy and verify
 
-Review the rules and deploy them to the intended Firebase project:
+Review the rules and deploy them to the intended Firebase project only after the emulator tests pass:
 
 ```bash
 firebase deploy --only firestore:rules
 ```
 
-The repository's `npm run test:unit` includes static contract tests that guard important rule clauses from accidental removal. These tests inspect the source text; they are not a Firestore Rules emulator and do not prove that a live project has these rules deployed.
-
-For runtime authorization testing, use the Firebase Local Emulator Suite and authenticated/unauthenticated test users before enabling new learner-data collections.
+Passing emulator tests prove the checked-in rules behave as tested in the local emulator. They do not prove that the same rules have been deployed to a live Firebase project.
 
 Official references:
 
-- [Control access to specific fields](https://firebase.google.com/docs/firestore/security/rules-fields)
-- [Writing conditions for Cloud Firestore Security Rules](https://firebase.google.com/docs/firestore/security/rules-conditions)
-- [Firestore request time and server timestamps](https://firebase.google.com/docs/reference/rules/rules.firestore.Request)
+- [Test Cloud Firestore Security Rules](https://firebase.google.com/docs/firestore/security/test-rules-emulator)
+- [Set up the Local Emulator Suite](https://firebase.google.com/docs/rules/emulator-setup)
+- [Firebase CLI release notes](https://firebase.google.com/support/release-notes/cli)
