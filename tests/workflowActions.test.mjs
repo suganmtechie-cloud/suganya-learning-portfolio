@@ -12,7 +12,7 @@ const workflowSources = await Promise.all(
 );
 
 const actionReferences = workflowSources.flatMap((source) =>
-  [...source.matchAll(/^\s*uses:\s*([^\s#]+)/gm)].map((match) => match[1]),
+  [...source.matchAll(/^\s*(?:-\s*)?uses:\s*([^\s#]+)/gm)].map((match) => match[1]),
 );
 
 const reviewedVersions = new Map([
@@ -37,7 +37,7 @@ test('workflows use the reviewed Node 24-compatible action releases', () => {
 
 test('checkout steps do not persist the GitHub token in local Git configuration', () => {
   for (const source of workflowSources) {
-    const checkoutCount = [...source.matchAll(/^\s*uses:\s*actions\/checkout@/gm)].length;
+    const checkoutCount = [...source.matchAll(/^\s*(?:-\s*)?uses:\s*actions\/checkout@/gm)].length;
     const disabledCredentialCount = [...source.matchAll(/^\s+persist-credentials:\s*false\s*$/gm)].length;
     assert.equal(disabledCredentialCount, checkoutCount);
   }
