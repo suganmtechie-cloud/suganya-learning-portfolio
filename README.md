@@ -63,3 +63,7 @@ The existing Express API is separate from the React app and is not currently use
 ## Privacy and security
 
 Do not add personal contact details, private learner information or confidential employer materials to this public repository. Never commit `.env.local`, Firebase service-account files, private keys or Admin SDK credentials. Publish the Firestore rules before using cloud data. Run `npm run test:rules` after changing Firestore rules; emulator tests do not deploy rules to production.
+
+## Continuous integration
+
+GitHub Actions runs frontend, Firestore Emulator and backend checks, then publishes the React Learning Studio alongside the existing static portfolio. The workflows use Node 24-compatible GitHub Actions releases, read-only build permissions and a separate deployment permission boundary. See [CI and deployment maintenance](docs/CI.md) for the reviewed action versions, credential handling, lockfile/caching decision and local verification steps.
