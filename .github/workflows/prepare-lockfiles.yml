@@ -13,6 +13,8 @@ permissions:
 jobs:
   generate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Check out repository
         uses: actions/checkout@v7.0.1
@@ -32,7 +34,7 @@ jobs:
         working-directory: backend
         run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
 
-      - name: Validate lockfiles against package manifests
+      - name: Validate lockfiles against package manifests and registry integrity
         run: |
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
@@ -48,15 +50,27 @@ jobs:
             if (lock.lockfileVersion !== 3) {
               throw new Error(`Expected lockfileVersion 3 for ${prefix}package-lock.json`);
             }
+            for (const [location, metadata] of Object.entries(lock.packages)) {
+              if (location === '' || !metadata.resolved) continue;
+              if (!metadata.resolved.startsWith('https://registry.npmjs.org/') || !metadata.integrity) {
+                throw new Error(`Unverified registry source or missing integrity for ${location}`);
+              }
+            }
           }
           NODE
 
-      - name: Upload generated lockfiles for review
-        uses: actions/upload-artifact@v7.0.2
-        with:
-          name: generated-npm-lockfiles
-          path: |
-            package-lock.json
-            backend/package-lock.json
-          if-no-files-found: error
-          retention-days: 7
+      - name: Push generated lockfiles to a review branch
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          branch="automation/npm-lockfiles-${GITHUB_RUN_ID}"
+          git switch --create "$branch"
+          git add package-lock.json backend/package-lock.json
+          if git diff --cached --quiet; then
+            echo "Lockfiles already match the checked-out manifests; no branch commit is needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          auth_header="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
+          git -c http.extraheader="$auth_header" push origin "HEAD:refs/heads/$branch"
