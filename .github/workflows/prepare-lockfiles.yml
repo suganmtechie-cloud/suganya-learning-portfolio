@@ -1,0 +1,62 @@
+name: Prepare npm lockfiles
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/prepare-lockfiles.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Generate root lockfile without installing packages or running scripts
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
+      - name: Generate backend lockfile without installing packages or running scripts
+        working-directory: backend
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
+      - name: Validate lockfiles against package manifests
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+
+          for (const directory of ['.', 'backend']) {
+            const prefix = directory === '.' ? '' : `${directory}/`;
+            const manifest = JSON.parse(fs.readFileSync(`${prefix}package.json`, 'utf8'));
+            const lock = JSON.parse(fs.readFileSync(`${prefix}package-lock.json`, 'utf8'));
+
+            if (lock.name !== manifest.name || lock.version !== manifest.version) {
+              throw new Error(`Lockfile metadata does not match ${prefix}package.json`);
+            }
+            if (lock.lockfileVersion !== 3) {
+              throw new Error(`Expected lockfileVersion 3 for ${prefix}package-lock.json`);
+            }
+          }
+          NODE
+
+      - name: Upload generated lockfiles for review
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: generated-npm-lockfiles
+          path: |
+            package-lock.json
+            backend/package-lock.json
+          if-no-files-found: error
+          retention-days: 7
