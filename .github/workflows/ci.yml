@@ -17,12 +17,14 @@ jobs:
       - uses: actions/setup-node@v7.1.0
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
       - uses: actions/setup-java@v6.3.0
         with:
           distribution: temurin
           java-version: '21'
           problem-matcher: true
-      - run: npm install
+      - run: npm ci
       - run: npm run test:unit
       - name: Test Firestore Security Rules in the local emulator
         run: npm run test:rules
@@ -38,7 +40,9 @@ jobs:
       - uses: actions/setup-node@v7.1.0
         with:
           node-version: 22
-      - run: npm install
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
         working-directory: backend
       - run: npm test
         working-directory: backend

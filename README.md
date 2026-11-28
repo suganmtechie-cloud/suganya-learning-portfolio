@@ -34,7 +34,7 @@ The Firebase browser configuration is supplied through GitHub Actions repository
 Requirements: Node.js 22.12+ and npm. Java 21+ is required only for Firestore emulator tests.
 
 ```bash
-npm install
+npm ci
 cp .env.example .env.local
 # Fill in the Firebase Web App configuration values.
 npm run dev
@@ -49,6 +49,8 @@ The workflow builds the React app and publishes it alongside the existing static
 ## Optional Express API
 
 The existing Express API is separate from the React app and is not currently used for pathway storage. Future server-side features should use Firebase Admin SDK only in a trusted server environment, with service-account credentials stored as server secrets and never exposed to the browser.
+
+Install the backend dependencies reproducibly with `npm --prefix backend ci`, then run its tests with `npm --prefix backend test`.
 
 ## Scripts
 
@@ -66,4 +68,4 @@ Do not add personal contact details, private learner information or confidential
 
 ## Continuous integration
 
-GitHub Actions runs frontend, Firestore Emulator and backend checks, then publishes the React Learning Studio alongside the existing static portfolio. The workflows use Node 24-compatible GitHub Actions releases, read-only build permissions and a separate deployment permission boundary. See [CI and deployment maintenance](docs/CI.md) for the reviewed action versions, credential handling, lockfile/caching decision and local verification steps.
+GitHub Actions uses committed npm lockfiles and `npm ci` for repeatable frontend, Firestore Emulator and backend checks. The Node setup action caches npm's package data using the matching lockfile as its cache key. The deployment workflow publishes the React Learning Studio alongside the existing static portfolio. See [CI and dependency maintenance](docs/CI.md) for the reviewed action versions, lockfile refresh process, cache configuration and verification steps.
