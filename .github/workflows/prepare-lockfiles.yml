@@ -76,6 +76,7 @@ jobs:
           fi
           git diff --cached --stat
           git config user.name "github-actions[bot]"
+          git commit -m "Add reproducible npm dependency lockfiles"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           auth_header="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
           git -c http.extraheader="$auth_header" push origin "HEAD:refs/heads/$branch"
