@@ -64,12 +64,17 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           branch="automation/npm-lockfiles-${GITHUB_RUN_ID}"
+          test -s package-lock.json
+          test -s backend/package-lock.json
           git switch --create "$branch"
-          git add package-lock.json backend/package-lock.json
+          git status --short --ignored
+          git add -f package-lock.json backend/package-lock.json
+          git status --short
           if git diff --cached --quiet; then
-            echo "Lockfiles already match the checked-out manifests; no branch commit is needed."
-            exit 0
+            echo "Expected generated lockfiles to be staged, but no changes were found."
+            exit 1
           fi
+          git diff --cached --stat
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           auth_header="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
